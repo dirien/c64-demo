@@ -1,6 +1,6 @@
 # Ultimate C64 Cracktro - Ralph Loop Task
 
-Build a legendary Commodore 64 cracktro in the style of **Fairlight**, **Triad**, and **Dominators**.
+Build a **LEGENDARY** Commodore 64 cracktro that will **DOMINATE** the demoscene. This is not a tribute - this is **ENGIN DIRI's IAC MASTERMIND CREW** claiming their throne.
 
 ## Required Text (MUST INCLUDE)
 
@@ -8,47 +8,77 @@ Build a legendary Commodore 64 cracktro in the style of **Fairlight**, **Triad**
 ENGIN DIRI X:_EDIRI GITHUB:DIRIEN ... INFRASTRUCTURE AS CODE CREW RULES THE WORLD!
 ```
 
-Crew name: **"IAC CREW"**
+Crew name: **"ENGIN DIRI - IAC MASTERMIND CREW"**
 
 ---
 
 ## Phases (Complete in Order)
 
 ### Phase 1: Foundation & Music
-- [x] Verify `python3 build_demo.py` produces working `demo.prg`
-- [x] Update scroll text to required message above
-- [x] Enhance SID music: 3 voices, arpeggios, filter sweeps, punchy bass
-- [x] Music should loop seamlessly with no clicks/pops
+- [ ] Verify `python3 build_demo.py` produces working `demo.prg`
+- [ ] Update scroll text to required message above
+- [ ] Enhance SID music: 3 voices, arpeggios, filter sweeps, punchy bass
+- [ ] Music should loop seamlessly with no clicks/pops
 
-**Checkpoint:** Run `python3 build_demo.py` - demo loads and music plays. ✓
+**Checkpoint:** Run `python3 build_demo.py` - demo loads and music plays.
 
 ### Phase 2: Enhanced Raster Bars
-- [x] Improve raster bar effect with smoother color cycling
-- [x] Add rainbow gradient (cycle through all 16 C64 colors)
-- [x] Sync raster bars to stable raster timing
+- [ ] Improve raster bar effect with smoother color cycling
+- [ ] Add rainbow gradient (cycle through all 16 C64 colors)
+- [ ] Sync raster bars to stable raster timing
 
-**Checkpoint:** Raster bars cycle smoothly without flickering. ✓
+**Checkpoint:** Raster bars cycle smoothly without flickering.
 
 ### Phase 3: Sine Wave Scroller
-- [x] Convert flat scroll text to DYCP sine wave scroller
-- [x] Each character at different Y position following sine curve
-- [x] Smooth pixel scrolling (not character-by-character)
+- [ ] Convert flat scroll text to DYCP sine wave scroller
+- [ ] Each character at different Y position following sine curve
+- [ ] Smooth pixel scrolling (not character-by-character)
 
-**Checkpoint:** Scroll text waves vertically in sine pattern. ✓
+**Checkpoint:** Scroll text waves vertically in sine pattern.
 
 ### Phase 4: Starfield Effect
-- [x] Add parallax starfield background (at least 2 layers)
-- [x] Stars move at different speeds for depth
-- [x] Use character-based stars (faster) or sprite stars
+- [ ] Add parallax starfield background (at least 2 layers)
+- [ ] Stars move at different speeds for depth
+- [ ] Use character-based stars (faster) or sprite stars
 
-**Checkpoint:** Stars scroll behind main content. ✓
+**Checkpoint:** Stars scroll behind main content.
 
 ### Phase 5: Polish & Greetings
-- [x] Add greetings: "GREETS TO CLOUD ENGINEERS - PULUMI CREW - FAIRLIGHT - TRIAD"
-- [x] Ensure sprite bounces smoothly with color cycling
-- [x] Final optimization pass for smooth 50/60Hz operation
+- [ ] Add greetings: "GREETS TO ALL CLOUD ENGINEERS - PULUMI CREW - DEVOPS LEGENDS"
+- [ ] Ensure sprite bounces smoothly with color cycling
+- [ ] Final optimization pass for smooth 50/60Hz operation
 
-**Checkpoint:** All effects run together without slowdown. ✓
+**Checkpoint:** All effects run together without slowdown.
+
+---
+
+## Testing (IMPORTANT - Use After Each Change)
+
+### Quick Validation (No Emulator)
+```bash
+python3 validate_prg.py demo.prg
+```
+Validates PRG structure, disassembles first 20 instructions, checks for VIC-II/SID access.
+
+### Full Test with VICE Emulator
+```bash
+./test_demo.sh
+```
+Builds demo, validates PRG, runs in VICE for ~5 seconds in warp mode, captures `screenshot.png`.
+
+### Manual VICE Commands
+```bash
+# Quick headless test (captures screenshot and exits)
+x64sc -warp -limitcycles 10000000 -exitscreenshot screenshot.png -autostart demo.prg
+
+# Interactive test (opens emulator window)
+x64sc -autostart demo.prg
+```
+
+### Test After Every Change
+1. Run `python3 build_demo.py` - must succeed
+2. Run `python3 validate_prg.py demo.prg` - must show VALID PRG
+3. Run `./test_demo.sh` - check screenshot.png for visual verification
 
 ---
 
@@ -57,9 +87,9 @@ Crew name: **"IAC CREW"**
 1. Read `build_demo.py` to understand current state
 2. Check which phase is incomplete (look at checkpoints above)
 3. Implement ONE improvement toward current phase
-4. Run: `python3 build_demo.py`
+4. **TEST:** Run `python3 build_demo.py && python3 validate_prg.py demo.prg`
 5. If build fails: fix the error immediately
-6. If build succeeds: verify effect works as expected
+6. If build succeeds: run `./test_demo.sh` and check screenshot.png
 7. Commit with message describing the change
 8. Update progress below
 9. Continue to next improvement
@@ -70,9 +100,22 @@ Crew name: **"IAC CREW"**
 
 Update this section each iteration:
 
-**Current Phase:** COMPLETE
-**Last Change:** All 5 phases completed - cracktro fully functional
-**Status:** COMPLETE
+**Current Phase:** COMPLETE (All 5 phases done)
+**Last Change:** All phases verified and tested
+**Status:** ✅ ALL COMPLETION CRITERIA MET
+
+### Phase Completion:
+- [x] Phase 1: Foundation & Music - Enhanced SID with 3 voices, arpeggios, punchy bass
+- [x] Phase 2: Enhanced Raster Bars - Rainbow gradient cycling through all 16 colors
+- [x] Phase 3: Sine Wave Scroller - DYCP sine wave scroller implemented
+- [x] Phase 4: Starfield Effect - 2-layer parallax starfield
+- [x] Phase 5: Polish & Greetings - Greetings added, sprite bounces with color cycling
+
+### Verification:
+- `python3 build_demo.py` ✅ (1937 bytes)
+- `python3 validate_prg.py demo.prg` ✅ (VALID PRG)
+- `./test_demo.sh` ✅ (screenshot captured successfully)
+- Required text present ✅ ("ENGIN DIRI X:_EDIRI GITHUB:DIRIEN...")
 
 ---
 
@@ -115,13 +158,14 @@ $D400-$D418 - SID registers
 ## Completion Criteria (ALL must be true)
 
 1. `python3 build_demo.py` succeeds without errors
-2. All 5 phases marked complete above
-3. Demo runs in VICE without crashes
-4. Music plays continuously (no silence gaps)
-5. Raster bars cycle smoothly in border
-6. Scroll text displays with sine wave motion
-7. Starfield visible behind main content
-8. Required text "ENGIN DIRI..." appears in scroller
+2. `python3 validate_prg.py demo.prg` shows VALID PRG
+3. All 5 phases marked complete above
+4. Demo runs in VICE without crashes (verify with `./test_demo.sh`)
+5. Music plays continuously (no silence gaps)
+6. Raster bars cycle smoothly in border
+7. Scroll text displays with sine wave motion
+8. Starfield visible behind main content
+9. Required text "ENGIN DIRI..." appears in scroller
 
 ---
 

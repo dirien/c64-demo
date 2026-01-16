@@ -83,37 +83,38 @@ DRUMS = [
 #     ████  ████           <- row of 2 ovals
 #        ████              <- bottom oval
 #
+# Pulumi logo sprite - converted from PNG with alpha channel detection
 SPRITE_DATA = [
-    0b00000000, 0b00000000, 0b00000000,  # Row 1
-    0b00000000, 0b11100000, 0b00000000,  # Row 2        ███
-    0b00000001, 0b11110000, 0b00000000,  # Row 3       █████   (top dot)
-    0b00000000, 0b11100000, 0b00000000,  # Row 4        ███
-    0b00000011, 0b10001110, 0b00000000,  # Row 5      ███ ███
-    0b00000111, 0b11011111, 0b00000000,  # Row 6     █████████  (2 dots)
-    0b00000011, 0b10001110, 0b00000000,  # Row 7      ███ ███
-    0b00001110, 0b00111000, 0b11100000,  # Row 8    ███  ███  ███
-    0b00011111, 0b01111101, 0b11110000,  # Row 9   █████████████████ (3 dots)
-    0b00011111, 0b01111101, 0b11110000,  # Row 10  █████████████████
-    0b00001110, 0b00111000, 0b11100000,  # Row 11   ███  ███  ███
-    0b00001110, 0b00111000, 0b11100000,  # Row 12   ███  ███  ███
-    0b00011111, 0b01111101, 0b11110000,  # Row 13  █████████████████ (3 dots)
-    0b00001110, 0b00111000, 0b11100000,  # Row 14   ███  ███  ███
-    0b00000011, 0b10001110, 0b00000000,  # Row 15     ███ ███
-    0b00000111, 0b11011111, 0b00000000,  # Row 16    █████████  (2 dots)
-    0b00000011, 0b10001110, 0b00000000,  # Row 17     ███ ███
-    0b00000000, 0b11100000, 0b00000000,  # Row 18       ███
-    0b00000001, 0b11110000, 0b00000000,  # Row 19      █████   (bottom dot)
-    0b00000000, 0b11100000, 0b00000000,  # Row 20       ███
+    0b00000000, 0b01111110, 0b00000000,  # Row 1
+    0b00000000, 0b11111111, 0b00000000,  # Row 2
+    0b00000000, 0b01111110, 0b00000000,  # Row 3
+    0b00001111, 0b00000000, 0b11110000,  # Row 4
+    0b00011111, 0b10000001, 0b11111000,  # Row 5
+    0b00011111, 0b00000000, 0b11111000,  # Row 6
+    0b11000000, 0b01111110, 0b00000011,  # Row 7
+    0b11110000, 0b11111111, 0b00001111,  # Row 8
+    0b11111000, 0b01111110, 0b00011111,  # Row 9
+    0b01111011, 0b10111101, 0b10011110,  # Row 10
+    0b00111011, 0b11000011, 0b11011100,  # Row 11
+    0b00011011, 0b11100111, 0b11011000,  # Row 12
+    0b01100011, 0b11100111, 0b11000110,  # Row 13
+    0b11110001, 0b11100111, 0b00001111,  # Row 14
+    0b11111000, 0b01100110, 0b00011111,  # Row 15
+    0b01111011, 0b10000001, 0b11011110,  # Row 16
+    0b00111011, 0b11100111, 0b11011100,  # Row 17
+    0b00000011, 0b11100111, 0b11000000,  # Row 18
+    0b00000011, 0b11100111, 0b11000000,  # Row 19
+    0b00000001, 0b11100111, 0b00000000,  # Row 20
     0b00000000, 0b00000000, 0b00000000,  # Row 21
 ]
 
 SCREEN = 0x0400
 COLORRAM = 0xD800
 
-title = "*** IAC CREW PRESENTS ***"
-cracked = "CRACKED BY"
-crew = "IAC CREW"
-scroll = "    ENGIN DIRI X:_EDIRI GITHUB:DIRIEN ... INFRASTRUCTURE AS CODE CREW RULES THE WORLD!   GREETS TO CLOUD ENGINEERS - PULUMI CREW - FAIRLIGHT - TRIAD       "
+title = "*** IAC MASTERMIND CREW ***"
+cracked = "PRESENTS"
+crew = "ENGIN DIRI"
+scroll = "    ENGIN DIRI X:_EDIRI GITHUB:DIRIEN ... INFRASTRUCTURE AS CODE CREW RULES THE WORLD!   GREETS TO ALL CLOUD ENGINEERS - PULUMI CREW - DEVOPS LEGENDS       "
 
 prg = bytearray()
 def lo(a): return a & 0xFF
@@ -291,7 +292,7 @@ code.extend([0xBD, 0x00, 0x00])  # LDA star_y_fast,X (row offset lo)
 code.extend([0x85, 0xF3])  # STA $F3
 star_yhi_fast_idx = len(code) + 1
 code.extend([0xBD, 0x00, 0x00])  # LDA star_yhi_fast,X (row offset hi)
-code.extend([0x85, 0xF2])  # STA $F2
+code.extend([0x85, 0xF4])  # STA $F4 (hi byte must be at $F3+1 for indirect!)
 code.extend([0xA9, 0x20])  # LDA #32 (space)
 code.extend([0x91, 0xF3])  # STA ($F3),Y
 
@@ -310,10 +311,10 @@ code.extend([0xA8])  # TAY (new X position)
 code.extend([0xA9, 0x51])  # LDA #$51 (filled circle char)
 code.extend([0x91, 0xF3])  # STA ($F3),Y
 # Color: white
-code.extend([0xA5, 0xF2])  # LDA hi
+code.extend([0xA5, 0xF4])  # LDA hi (from $F4 now)
 code.extend([0x18])  # CLC
 code.extend([0x69, 0xD4])  # ADC #$D4
-code.extend([0x85, 0xF2])  # STA hi (now points to color RAM)
+code.extend([0x85, 0xF4])  # STA hi (now points to color RAM)
 code.extend([0xA9, 0x01])  # LDA #1 (white)
 code.extend([0x91, 0xF3])  # STA ($F3),Y
 
@@ -334,7 +335,7 @@ code.extend([0xBD, 0x00, 0x00])  # LDA star_y_slow,X
 code.extend([0x85, 0xF3])  # STA $F3
 star_yhi_slow_idx = len(code) + 1
 code.extend([0xBD, 0x00, 0x00])  # LDA star_yhi_slow,X
-code.extend([0x85, 0xF2])  # STA $F2
+code.extend([0x85, 0xF4])  # STA $F4 (hi byte must be at $F3+1 for indirect!)
 code.extend([0xA9, 0x20])  # LDA #32 (space)
 code.extend([0x91, 0xF3])  # STA ($F3),Y
 
@@ -352,10 +353,10 @@ code.extend([0x9D, 0x00, 0x00])  # STA star_x_slow,X
 code.extend([0xA8])  # TAY
 code.extend([0xA9, 0x2E])  # LDA #$2E (period for distant star)
 code.extend([0x91, 0xF3])  # STA ($F3),Y
-code.extend([0xA5, 0xF2])  # LDA hi
+code.extend([0xA5, 0xF4])  # LDA hi (from $F4 now)
 code.extend([0x18])  # CLC
 code.extend([0x69, 0xD4])  # ADC #$D4
-code.extend([0x85, 0xF2])  # STA hi
+code.extend([0x85, 0xF4])  # STA hi (now points to color RAM)
 code.extend([0xA9, 0x0C])  # LDA #12 (gray - dimmer)
 code.extend([0x91, 0xF3])  # STA ($F3),Y
 
@@ -521,25 +522,26 @@ code.extend([0xB9, 0x00, 0x00])  # LDA sine_table,Y (get row 0-4)
 code.extend([0xA8])  # TAY (Y = row number)
 
 # Get screen row base address from lookup table
+# Use $F0-$F1 for screen pointer (not $FA-$FB which conflicts with scroll text ptr)
 row_table_idx = len(code) + 1
 code.extend([0xB9, 0x00, 0x00])  # LDA row_lo_table,Y
-code.extend([0x85, 0xFA])  # STA screen_lo ($FA)
+code.extend([0x85, 0xF0])  # STA screen_lo ($F0)
 row_table_hi_idx = len(code) + 1
 code.extend([0xB9, 0x00, 0x00])  # LDA row_hi_table,Y
-code.extend([0x85, 0xF4])  # STA screen_hi ($F4)
+code.extend([0x85, 0xF1])  # STA screen_hi ($F1 - must be $F0+1 for indirect!)
 
 # Store character at screen + X
 code.extend([0xA4, 0xF5])  # LDY $F5 (X position)
 code.extend([0xA5, 0xF7])  # LDA character
-code.extend([0x91, 0xFA])  # STA ($FA),Y - write to screen
+code.extend([0x91, 0xF0])  # STA ($F0),Y - write to screen
 
 # Set color: convert screen addr to color RAM addr ($04xx->$D8xx, $07xx->$DBxx)
-code.extend([0xA5, 0xF4])  # LDA screen_hi
+code.extend([0xA5, 0xF1])  # LDA screen_hi (from $F1)
 code.extend([0x18])  # CLC
 code.extend([0x69, 0xD4])  # ADC #$D4
-code.extend([0x85, 0xF4])  # STA color_hi
+code.extend([0x85, 0xF1])  # STA color_hi (to $F1)
 code.extend([0xA9, 0x0E])  # LDA #14 (light blue)
-code.extend([0x91, 0xFA])  # STA ($FA),Y - write color
+code.extend([0x91, 0xF0])  # STA ($F0),Y - write color
 
 # Next character
 code.extend([0xA6, 0xF5])  # LDX $F5

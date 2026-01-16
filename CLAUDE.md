@@ -1,20 +1,21 @@
-# C64 Demo Project
+# C64 Demo Project - IAC MASTERMIND CREW
 
 ## Overview
-Classic Commodore 64 cracktro-style demo featuring:
-- Raster color bar effects
-- Scrolling text message
-- 3-channel SID music (Last Ninja Japanese style)
+Legendary Commodore 64 cracktro-style demo by **ENGIN DIRI - IAC MASTERMIND CREW** featuring:
+- Rainbow raster color bar effects
+- DYCP sine wave scrolling text
+- 2-layer parallax starfield
+- 3-channel SID music (classic cracktro arpeggios)
 - Bouncing Pulumi logo sprite with color cycling
 
 ## Files
-- `demo.prg` - Compiled C64 program (~1745 bytes)
-- `demo.d64` - D64 disk image for emulator compatibility
+- `demo.prg` - Compiled C64 program (~1937 bytes)
 - `build_demo.py` - Python script that generates the .prg file
+- `validate_prg.py` - PRG structure validator and 6502 disassembler
+- `test_demo.sh` - Automated test script using VICE emulator
 - `make_d64.py` - Creates D64 disk image from .prg
 - `png2sprite.py` - Converts PNG images to C64 sprite data
-- `demo.asm` - 6502 assembly source (reference only)
-- `avatar-on-white.png` - Pulumi logo source image
+- `PROMPT.md` - Ralph Loop task prompt for autonomous development
 
 ## Build
 ```bash
@@ -23,11 +24,22 @@ python3 make_d64.py      # Creates demo.d64 (optional)
 ```
 No external assembler required - the Python script hand-assembles the 6502 code.
 
+## Test
+```bash
+# Validate PRG structure
+python3 validate_prg.py demo.prg
+
+# Full automated test (builds, validates, runs VICE, captures screenshot)
+./test_demo.sh
+
+# Quick headless test with screenshot
+x64sc -warp -limitcycles 10000000 -exitscreenshot screenshot.png -autostart demo.prg
+```
+
 ## Run
 ```bash
-# VICE emulator
-x64 demo.prg
-# Then type: RUN
+# VICE emulator (interactive)
+x64sc -autostart demo.prg
 
 # VirtualC64
 # Drag demo.d64 onto window, then:
@@ -46,6 +58,12 @@ RUN
   - `$04` - Sprite X direction
   - `$05` - Sprite Y direction
   - `$06` - Sprite color
+  - `$F0-$F1` - Screen pointer (for sine scroller)
+  - `$F3-$F4` - Star pointer (for starfield)
+  - `$F5` - Temp X position
+  - `$F7` - Temp character
+  - `$F8` - Sine phase
+  - `$F9` - Raster offset
   - `$FB-$FC` - Scroll text pointer
   - `$FD` - Scroll counter
   - `$FE` - Music index
@@ -60,22 +78,23 @@ RUN
 
 ### Effects
 
-1. **Raster bars** - Border color changes synced to raster line
-2. **Bouncing sprite** - Pulumi logo bounces off screen edges
-3. **Color cycling** - Sprite changes color on each bounce (1-15, skips black)
-4. **Scroll text** - Bottom line scrolls left with message
+1. **Rainbow Raster Bars** - Animated border colors cycling through all 16 C64 colors
+2. **DYCP Sine Wave Scroller** - Text waves vertically in classic demoscene style
+3. **Parallax Starfield** - 2-layer stars moving at different speeds for depth
+4. **Bouncing Sprite** - Pulumi logo bounces off screen edges
+5. **Color Cycling** - Sprite changes color on each bounce (1-15, skips black)
 
-### SID Music (Last Ninja Japanese Style)
+### SID Music (Classic Cracktro Style)
 
 Three voices with distinct roles:
-- **Voice 1 (Lead)**: Triangle wave, Japanese "In" scale (E, F, A, B, C)
-  - Soft attack ADSR for flute-like shakuhachi sound
-- **Voice 2 (Bass)**: Sawtooth wave, sparse octave hits
-  - Deep, punchy sound with full sustain
-- **Voice 3 (Drums)**: Noise wave, taiko-style patterns
-  - Kick, rim clicks, and sparse fills
+- **Voice 1 (Lead)**: Pulse wave with fast arpeggios (C minor scale)
+  - Snappy ADSR for percussive arpeggio sound
+- **Voice 2 (Bass)**: Sawtooth wave, driving octave hits
+  - Punchy bass with quick decay
+- **Voice 3 (Drums)**: Noise wave, energetic beat patterns
+  - Kick, snare, and hi-hat patterns
 
-64-note patterns with slower tempo for atmospheric feel.
+64-note patterns with fast tempo for energetic cracktro feel.
 
 ### Sprite Details
 - 24x21 pixels, monochrome (single color)
