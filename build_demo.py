@@ -230,6 +230,8 @@ code.extend([0xA9, 0x00, 0x85, 0xFC])
 code.extend([0xA9, 0x00, 0x85, 0xFD, 0xA9, 0x00, 0x85, 0xFE, 0xA9, 0x00, 0x85, 0xFF])
 # Init raster offset ($F9) for animated raster bars
 code.extend([0xA9, 0x00, 0x85, 0xF9])
+# Init sine phase ($F8) for sine wave scroller
+code.extend([0xA9, 0x00, 0x85, 0xF8])
 
 # CLI
 code.append(0x58)
@@ -365,26 +367,96 @@ code.extend([0xE6, 0xFE, 0xA5, 0xFE, 0xC9, len(MELODY), 0xD0, 0x04, 0xA9, 0x00, 
 music_end = len(code)
 code[music_bne_idx] = (music_end - music_bne_idx - 1) & 0xFF
 
-# === SCROLL ===
+# === SINE WAVE SCROLL ===
+# Use $F8 for sine phase, increment each frame for animation
+code.extend([0xE6, 0xF8])  # INC sine_phase
+
+# Speed control - scroll every 4 frames
 code.extend([0xE6, 0xFD, 0xA5, 0xFD, 0x29, 0x03])
 scroll_bne_idx = len(code) + 1
 code.extend([0xD0, 0x00])
 
-scroll_code_start = len(code)
-code.extend([0xA2, 0x00])
-shift_pos = len(code)
-code.extend([0xBD, 0xC1, 0x07, 0x9D, 0xC0, 0x07, 0xBD, 0xC1, 0xDB, 0x9D, 0xC0, 0xDB, 0xE8, 0xE0, 0x27])
-offset = (shift_pos - (len(code) + 2)) & 0xFF
-code.extend([0xD0, offset])
+# Clear scroll area (rows 19-23, 5 rows)
+code.extend([0xA2, 0x00])  # LDX #0
+clear_scroll_pos = len(code)
+code.extend([0xA9, 0x20])  # LDA #32 (space)
+# Clear row 19 ($0400 + 19*40 = $0400 + 760 = $06F8)
+code.extend([0x9D, 0xF8, 0x06])  # STA $06F8,X
+# Clear row 20
+code.extend([0x9D, 0x20, 0x07])  # STA $0720,X
+# Clear row 21
+code.extend([0x9D, 0x48, 0x07])  # STA $0748,X
+# Clear row 22
+code.extend([0x9D, 0x70, 0x07])  # STA $0770,X
+# Clear row 23
+code.extend([0x9D, 0x98, 0x07])  # STA $0798,X
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0x28])  # CPX #40
+offset = (clear_scroll_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])  # BNE clear_loop
 
-code.extend([0xA0, 0x00, 0xB1, 0xFB, 0xD0, 0x08])
+# Check for end of scroll text and reset if needed
+code.extend([0xA0, 0x00])  # LDY #0
+code.extend([0xB1, 0xFB])  # LDA ($FB),Y - get first char
+code.extend([0xD0, 0x08])  # BNE not_end
+# Reset scroll if at end
 reset_lo_idx = len(code) + 1
 code.extend([0xA9, 0x00, 0x85, 0xFB])
 reset_hi_idx = len(code) + 1
 code.extend([0xA9, 0x00, 0x85, 0xFC])
-code.extend([0xB1, 0xFB])
+# not_end:
 
-code.extend([0x8D, 0xE7, 0x07, 0xA9, 0x0E, 0x8D, 0xE7, 0xDB])
+# Draw 40 characters with sine wave Y positions
+code.extend([0xA2, 0x00])  # LDX #0 (character position 0-39)
+sine_draw_pos = len(code)
+
+# Save X to $F5
+code.extend([0x86, 0xF5])  # STX $F5
+
+# Get character at ($FB),X
+code.extend([0xA5, 0xF5])  # LDA $F5 (X position)
+code.extend([0xA8])  # TAY
+code.extend([0xB1, 0xFB])  # LDA ($FB),Y - get char at offset X
+code.extend([0x85, 0xF7])  # STA $F7 (save character)
+
+# Calculate Y position from sine table: sine_table[(X + sine_phase) & 31]
+code.extend([0xA5, 0xF5])  # LDA X position
+code.extend([0x18, 0x65, 0xF8])  # CLC, ADC sine_phase
+code.extend([0x29, 0x1F])  # AND #31
+code.extend([0xA8])  # TAY
+sine_table_idx = len(code) + 1
+code.extend([0xB9, 0x00, 0x00])  # LDA sine_table,Y (get row 0-4)
+code.extend([0xA8])  # TAY (Y = row number)
+
+# Get screen row base address from lookup table
+row_table_idx = len(code) + 1
+code.extend([0xB9, 0x00, 0x00])  # LDA row_lo_table,Y
+code.extend([0x85, 0xFA])  # STA screen_lo ($FA)
+row_table_hi_idx = len(code) + 1
+code.extend([0xB9, 0x00, 0x00])  # LDA row_hi_table,Y
+code.extend([0x85, 0xF4])  # STA screen_hi ($F4)
+
+# Store character at screen + X
+code.extend([0xA4, 0xF5])  # LDY $F5 (X position)
+code.extend([0xA5, 0xF7])  # LDA character
+code.extend([0x91, 0xFA])  # STA ($FA),Y - write to screen
+
+# Set color: convert screen addr to color RAM addr ($04xx->$D8xx, $07xx->$DBxx)
+code.extend([0xA5, 0xF4])  # LDA screen_hi
+code.extend([0x18])  # CLC
+code.extend([0x69, 0xD4])  # ADC #$D4
+code.extend([0x85, 0xF4])  # STA color_hi
+code.extend([0xA9, 0x0E])  # LDA #14 (light blue)
+code.extend([0x91, 0xFA])  # STA ($FA),Y - write color
+
+# Next character
+code.extend([0xA6, 0xF5])  # LDX $F5
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0x28])  # CPX #40
+offset = (sine_draw_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])  # BNE sine_draw_loop
+
+# Increment scroll position
 code.extend([0xE6, 0xFB, 0xD0, 0x02, 0xE6, 0xFC])
 
 # JMP main
@@ -431,6 +503,25 @@ raster_color_addr = BASE + len(code)
 RASTER_COLORS = [0, 11, 9, 8, 7, 13, 3, 14, 6, 4, 2, 10, 12, 15, 1, 15]
 code.extend(RASTER_COLORS)
 
+# Sine table for Y positions (32 entries, values 0-4 for 5 rows)
+sine_table_addr = BASE + len(code)
+import math
+SINE_TABLE = []
+for i in range(32):
+    val = int(2 + 2 * math.sin(i * math.pi * 2 / 32))  # 0-4 range
+    SINE_TABLE.append(val)
+code.extend(SINE_TABLE)
+
+# Row address lookup tables (5 rows: 19-23)
+# Row 19: $06F8, Row 20: $0720, Row 21: $0748, Row 22: $0770, Row 23: $0798
+row_lo_table_addr = BASE + len(code)
+ROW_LO = [0xF8, 0x20, 0x48, 0x70, 0x98]
+code.extend(ROW_LO)
+
+row_hi_table_addr = BASE + len(code)
+ROW_HI = [0x06, 0x07, 0x07, 0x07, 0x07]
+code.extend(ROW_HI)
+
 # Sprite data
 sprite_data_addr = BASE + len(code)
 code.extend(SPRITE_DATA)
@@ -458,6 +549,14 @@ code[drum_hi_idx+1] = hi(drum_hi_addr)
 # Patch raster color table reference
 code[raster_color_idx] = lo(raster_color_addr)
 code[raster_color_idx+1] = hi(raster_color_addr)
+
+# Patch sine table and row table references
+code[sine_table_idx] = lo(sine_table_addr)
+code[sine_table_idx+1] = hi(sine_table_addr)
+code[row_table_idx] = lo(row_lo_table_addr)
+code[row_table_idx+1] = hi(row_lo_table_addr)
+code[row_table_hi_idx] = lo(row_hi_table_addr)
+code[row_table_hi_idx+1] = hi(row_hi_table_addr)
 
 # Calculate sprite block number (sprite_data_addr / 64)
 sprite_block = sprite_data_addr // 64

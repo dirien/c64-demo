@@ -70,8 +70,8 @@ Crew name: **"IAC CREW"**
 
 Update this section each iteration:
 
-**Current Phase:** 3
-**Last Change:** Completed Phase 2 - Added animated rainbow raster bars with 16-color cycle
+**Current Phase:** 4
+**Last Change:** Completed Phase 3 - Added DYCP sine wave scroller with 32-entry sine table
 **Status:** IN_PROGRESS
 
 ---
