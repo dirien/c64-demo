@@ -70,8 +70,8 @@ Crew name: **"IAC CREW"**
 
 Update this section each iteration:
 
-**Current Phase:** 4
-**Last Change:** Completed Phase 3 - Added DYCP sine wave scroller with 32-entry sine table
+**Current Phase:** 5
+**Last Change:** Completed Phase 4 - Added 2-layer parallax starfield (16 stars)
 **Status:** IN_PROGRESS
 
 ---

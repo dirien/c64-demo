@@ -272,6 +272,98 @@ code.extend([0xD0, offset])  # BNE raster_loop
 
 code.extend([0xA9, 0x00, 0x8D, 0x20, 0xD0])  # Reset border to black
 
+# === STARFIELD ===
+# Update 16 stars at fixed Y positions, moving left at different speeds
+# Stars are stored in star_x array, updated each frame
+# Layer 1 (fast, 8 stars): decrement X by 2
+# Layer 2 (slow, 8 stars): decrement X by 1
+# Star character: $2E (period) or $51 (filled circle)
+
+# Update fast stars (layer 1)
+code.extend([0xA2, 0x00])  # LDX #0
+star_loop1_pos = len(code)
+# Erase old star: read position, write space
+star_x_fast_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_x_fast,X
+code.extend([0xA8])  # TAY
+star_y_fast_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_y_fast,X (row offset lo)
+code.extend([0x85, 0xF3])  # STA $F3
+star_yhi_fast_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_yhi_fast,X (row offset hi)
+code.extend([0x85, 0xF2])  # STA $F2
+code.extend([0xA9, 0x20])  # LDA #32 (space)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+
+# Move star left by 2
+code.extend([0x98])  # TYA
+code.extend([0x38])  # SEC
+code.extend([0xE9, 0x02])  # SBC #2
+code.extend([0x10, 0x02])  # BPL no_wrap
+code.extend([0xA9, 0x27])  # LDA #39 (wrap to right)
+# no_wrap:
+star_x_store_fast = len(code) + 1
+code.extend([0x9D, 0x00, 0x00])  # STA star_x_fast,X
+
+# Draw new star
+code.extend([0xA8])  # TAY (new X position)
+code.extend([0xA9, 0x51])  # LDA #$51 (filled circle char)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+# Color: white
+code.extend([0xA5, 0xF2])  # LDA hi
+code.extend([0x18])  # CLC
+code.extend([0x69, 0xD4])  # ADC #$D4
+code.extend([0x85, 0xF2])  # STA hi (now points to color RAM)
+code.extend([0xA9, 0x01])  # LDA #1 (white)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0x08])  # CPX #8
+offset = (star_loop1_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])
+
+# Update slow stars (layer 2)
+code.extend([0xA2, 0x00])  # LDX #0
+star_loop2_pos = len(code)
+# Erase old star
+star_x_slow_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_x_slow,X
+code.extend([0xA8])  # TAY
+star_y_slow_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_y_slow,X
+code.extend([0x85, 0xF3])  # STA $F3
+star_yhi_slow_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_yhi_slow,X
+code.extend([0x85, 0xF2])  # STA $F2
+code.extend([0xA9, 0x20])  # LDA #32 (space)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+
+# Move star left by 1
+code.extend([0x98])  # TYA
+code.extend([0x38])  # SEC
+code.extend([0xE9, 0x01])  # SBC #1
+code.extend([0x10, 0x02])  # BPL no_wrap2
+code.extend([0xA9, 0x27])  # LDA #39 (wrap)
+# no_wrap2:
+star_x_store_slow = len(code) + 1
+code.extend([0x9D, 0x00, 0x00])  # STA star_x_slow,X
+
+# Draw new star (dimmer, gray)
+code.extend([0xA8])  # TAY
+code.extend([0xA9, 0x2E])  # LDA #$2E (period for distant star)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+code.extend([0xA5, 0xF2])  # LDA hi
+code.extend([0x18])  # CLC
+code.extend([0x69, 0xD4])  # ADC #$D4
+code.extend([0x85, 0xF2])  # STA hi
+code.extend([0xA9, 0x0C])  # LDA #12 (gray - dimmer)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0x08])  # CPX #8
+offset = (star_loop2_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])
+
 # === SPRITE MOVEMENT ===
 # Simpler approach: always update position, check bounds, change color on bounce
 
@@ -522,6 +614,37 @@ row_hi_table_addr = BASE + len(code)
 ROW_HI = [0x06, 0x07, 0x07, 0x07, 0x07]
 code.extend(ROW_HI)
 
+# Star position tables for parallax starfield
+# Fast stars (layer 1) - X positions (8 stars)
+star_x_fast_addr = BASE + len(code)
+STAR_X_FAST = [5, 15, 25, 35, 10, 20, 30, 38]  # Initial X positions
+code.extend(STAR_X_FAST)
+
+# Fast stars - Y row addresses (lo byte), rows 6-13
+star_y_fast_addr = BASE + len(code)
+# Rows: 6=$04F0, 7=$0518, 8=$0540, 9=$0568, 10=$0590, 11=$05B8, 12=$05E0, 13=$0608
+STAR_Y_FAST_LO = [0xF0, 0x18, 0x40, 0x68, 0x90, 0xB8, 0xE0, 0x08]
+code.extend(STAR_Y_FAST_LO)
+
+star_yhi_fast_addr = BASE + len(code)
+STAR_Y_FAST_HI = [0x04, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x06]
+code.extend(STAR_Y_FAST_HI)
+
+# Slow stars (layer 2) - X positions (8 stars)
+star_x_slow_addr = BASE + len(code)
+STAR_X_SLOW = [3, 12, 22, 33, 8, 18, 28, 36]
+code.extend(STAR_X_SLOW)
+
+# Slow stars - Y row addresses, rows 7-14
+star_y_slow_addr = BASE + len(code)
+# Rows: 7=$0518, 8=$0540, 9=$0568, 10=$0590, 11=$05B8, 12=$05E0, 13=$0608, 14=$0630
+STAR_Y_SLOW_LO = [0x18, 0x40, 0x68, 0x90, 0xB8, 0xE0, 0x08, 0x30]
+code.extend(STAR_Y_SLOW_LO)
+
+star_yhi_slow_addr = BASE + len(code)
+STAR_Y_SLOW_HI = [0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x06, 0x06]
+code.extend(STAR_Y_SLOW_HI)
+
 # Sprite data
 sprite_data_addr = BASE + len(code)
 code.extend(SPRITE_DATA)
@@ -557,6 +680,24 @@ code[row_table_idx] = lo(row_lo_table_addr)
 code[row_table_idx+1] = hi(row_lo_table_addr)
 code[row_table_hi_idx] = lo(row_hi_table_addr)
 code[row_table_hi_idx+1] = hi(row_hi_table_addr)
+
+# Patch starfield table references
+code[star_x_fast_idx] = lo(star_x_fast_addr)
+code[star_x_fast_idx+1] = hi(star_x_fast_addr)
+code[star_y_fast_idx] = lo(star_y_fast_addr)
+code[star_y_fast_idx+1] = hi(star_y_fast_addr)
+code[star_yhi_fast_idx] = lo(star_yhi_fast_addr)
+code[star_yhi_fast_idx+1] = hi(star_yhi_fast_addr)
+code[star_x_store_fast] = lo(star_x_fast_addr)
+code[star_x_store_fast+1] = hi(star_x_fast_addr)
+code[star_x_slow_idx] = lo(star_x_slow_addr)
+code[star_x_slow_idx+1] = hi(star_x_slow_addr)
+code[star_y_slow_idx] = lo(star_y_slow_addr)
+code[star_y_slow_idx+1] = hi(star_y_slow_addr)
+code[star_yhi_slow_idx] = lo(star_yhi_slow_addr)
+code[star_yhi_slow_idx+1] = hi(star_yhi_slow_addr)
+code[star_x_store_slow] = lo(star_x_slow_addr)
+code[star_x_store_slow+1] = hi(star_x_slow_addr)
 
 # Calculate sprite block number (sprite_data_addr / 64)
 sprite_block = sprite_data_addr // 64
