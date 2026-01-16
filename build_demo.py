@@ -14,6 +14,8 @@ def text_to_petscii(text):
         elif c == '*': result.append(42)
         elif c == '-': result.append(45)
         elif c == '.': result.append(46)
+        elif c == ':': result.append(58)
+        elif c == '_': result.append(100)  # underscore in PETSCII
         else: result.append(32)
     return result
 
@@ -34,42 +36,42 @@ SID_NOTES = {
     'REST': (0x00, 0x00)
 }
 
-# Last Ninja Japanese style - 64 note patterns
-# Using Japanese "In" scale (E, F, A, B, C) for haunting Eastern feel
+# Classic cracktro style - energetic arpeggio-based music
+# Using C minor scale for dramatic sound (C, D, Eb, F, G, Ab, Bb)
 MELODY = [
-    # Part A - Sparse Japanese melody, lots of space
-    'E4','REST','REST','REST','F4','REST','E4','REST',
-    'REST','REST','A4','REST','REST','REST','REST','REST',
-    'B4','REST','REST','REST','A4','REST','E4','REST',
-    'F4','REST','E4','REST','REST','REST','REST','REST',
-    # Part B - Rising tension
-    'A4','REST','B4','REST','C5','REST','REST','REST',
-    'B4','REST','A4','REST','E4','REST','REST','REST',
-    'F4','REST','A4','REST','E4','REST','F4','REST',
-    'E4','REST','REST','REST','REST','REST','REST','REST',
+    # Part A - Arpeggio lead, classic cracktro feel
+    'C4','E4','G4','C5','G4','E4','C4','E4',
+    'G4','C5','E5','C5','G4','E4','C4','REST',
+    'A3','C4','E4','A4','E4','C4','A3','C4',
+    'E4','A4','C5','A4','E4','C4','A3','REST',
+    # Part B - Rising arpeggios
+    'F3','A3','C4','F4','C4','A3','F3','A3',
+    'C4','F4','A4','F4','C4','A3','F3','REST',
+    'G3','B3','D4','G4','D4','B3','G3','B3',
+    'D4','G4','B4','G4','D4','B3','G3','REST',
 ]
 
-# Bass - minimal, deep, rhythmic like Last Ninja
+# Bass - punchy, driving bass line
 BASS = [
-    # Sparse bass with octave hits
-    'E2','REST','E3','REST','E2','REST','REST','REST',
-    'E2','REST','E3','REST','E2','REST','E2','E3',
-    'A2','REST','A3','REST','A2','REST','REST','REST',
-    'A2','REST','A3','REST','G2','REST','G3','REST',
-    # Second half - building
-    'E2','REST','E3','REST','E2','E2','E3','REST',
-    'F2','REST','F3','REST','E2','REST','E3','REST',
-    'A2','REST','A3','REST','A2','A2','A3','REST',
-    'E2','E2','E3','E2','E2','E3','E2','REST',
+    # Classic C64 bass pattern
+    'C2','C2','C3','C2','C2','C3','C2','C3',
+    'C2','C2','C3','C2','C2','C3','C2','REST',
+    'A2','A2','A3','A2','A2','A3','A2','A3',
+    'A2','A2','A3','A2','A2','A3','A2','REST',
+    # Second half
+    'F2','F2','F3','F2','F2','F3','F2','F3',
+    'F2','F2','F3','F2','F2','F3','F2','REST',
+    'G2','G2','G3','G2','G2','G3','G2','G3',
+    'G2','G2','G3','G2','G2','G3','G2','REST',
 ]
 
-# Drums - sparse, taiko-style with rim clicks
-# 1=deep kick, 2=rim/snare, 3=soft tick, 0=rest
+# Drums - energetic cracktro beat
+# 1=kick, 2=snare, 3=hihat, 0=rest
 DRUMS = [
-    1,0,0,3,0,0,3,0,1,0,0,3,2,0,0,0,  # Sparse taiko feel
-    1,0,0,3,0,0,3,0,1,0,3,0,2,0,3,0,  # Variation
-    1,0,0,0,2,0,0,0,1,0,0,3,2,0,0,3,  # Minimal
-    1,0,3,0,2,0,3,0,1,0,1,0,2,0,2,0,  # Building fill
+    1,0,3,0,2,0,3,0,1,0,3,0,2,0,3,3,  # Basic beat
+    1,0,3,0,2,0,3,0,1,1,3,0,2,0,3,0,  # Variation
+    1,0,3,0,2,0,3,0,1,0,3,0,2,2,3,0,  # Double snare
+    1,0,3,3,2,0,3,0,1,1,3,0,2,0,2,0,  # Fill
 ]
 
 # Sprite data - Pulumi logo: 9 ovals in isometric cube arrangement
@@ -108,10 +110,10 @@ SPRITE_DATA = [
 SCREEN = 0x0400
 COLORRAM = 0xD800
 
-title = "*** CLASSIC C64 DEMO ***"
+title = "*** IAC CREW PRESENTS ***"
 cracked = "CRACKED BY"
-crew = "CLAUDE CODERS"
-scroll = "    WELCOME TO THE PULUMI DEMO!   GREETINGS TO ALL CLOUD ENGINEERS!   INFRASTRUCTURE AS CODE FOREVER!   MUSIC IN THE STYLE OF THE LAST NINJA BY BEN DAGLISH...   LONG LIVE THE COMMODORE 64!       "
+crew = "IAC CREW"
+scroll = "    ENGIN DIRI X:_EDIRI GITHUB:DIRIEN ... INFRASTRUCTURE AS CODE CREW RULES THE WORLD!   GREETS TO CLOUD ENGINEERS - PULUMI CREW - FAIRLIGHT - TRIAD       "
 
 prg = bytearray()
 def lo(a): return a & 0xFF
@@ -174,23 +176,28 @@ for i, ch in enumerate(wpet):
 # Init SID
 for i in range(25):
     code.extend([0xA9, 0x00, 0x8D, lo(0xD400+i), hi(0xD400+i)])
-# SID master volume
-code.extend([0xA9, 0x0F, 0x8D, 0x18, 0xD4])
-# Voice 1 (lead): ADSR - soft attack for flute-like Japanese shakuhachi sound
-code.extend([0xA9, 0x36, 0x8D, 0x05, 0xD4])  # Attack/Decay: A=3, D=6 (soft attack)
-code.extend([0xA9, 0xC7, 0x8D, 0x06, 0xD4])  # Sustain/Release: S=C, R=7
-# Voice 1 pulse width (for rich sound)
+# SID master volume with low-pass filter
+code.extend([0xA9, 0x1F, 0x8D, 0x18, 0xD4])  # Volume 15 + lowpass filter on
+# Filter cutoff - medium high for bright sound
+code.extend([0xA9, 0x00, 0x8D, 0x15, 0xD4])  # Filter cutoff lo
+code.extend([0xA9, 0x40, 0x8D, 0x16, 0xD4])  # Filter cutoff hi (medium)
+# Filter resonance and routing - filter voice 1 and 2
+code.extend([0xA9, 0x73, 0x8D, 0x17, 0xD4])  # Resonance=7, filter voices 1+2
+# Voice 1 (lead): ADSR - fast arpeggio attack for classic cracktro
+code.extend([0xA9, 0x09, 0x8D, 0x05, 0xD4])  # Attack/Decay: A=0, D=9 (snappy)
+code.extend([0xA9, 0x00, 0x8D, 0x06, 0xD4])  # Sustain/Release: S=0, R=0 (percussive)
+# Voice 1 pulse width (for rich PWM sound)
 code.extend([0xA9, 0x00, 0x8D, 0x02, 0xD4])  # PW lo
 code.extend([0xA9, 0x08, 0x8D, 0x03, 0xD4])  # PW hi (50% duty)
 # Voice 2 (bass): ADSR - punchy bass
-code.extend([0xA9, 0x00, 0x8D, 0x0C, 0xD4])  # Attack/Decay: A=0, D=0
-code.extend([0xA9, 0xF6, 0x8D, 0x0D, 0xD4])  # Sustain/Release: S=F, R=6
-# Voice 2 pulse width
+code.extend([0xA9, 0x09, 0x8D, 0x0C, 0xD4])  # Attack/Decay: A=0, D=9
+code.extend([0xA9, 0x00, 0x8D, 0x0D, 0xD4])  # Sustain/Release: S=0, R=0 (punchy)
+# Voice 2 pulse width - saw wave for bass
 code.extend([0xA9, 0x00, 0x8D, 0x09, 0xD4])  # PW lo
-code.extend([0xA9, 0x04, 0x8D, 0x0A, 0xD4])  # PW hi (25% duty - more bass)
+code.extend([0xA9, 0x04, 0x8D, 0x0A, 0xD4])  # PW hi (25% duty)
 # Voice 3 (drums): ADSR - percussive
 code.extend([0xA9, 0x00, 0x8D, 0x13, 0xD4])  # Attack/Decay: A=0, D=0
-code.extend([0xA9, 0x80, 0x8D, 0x14, 0xD4])  # Sustain/Release: S=8, R=0 (quick decay)
+code.extend([0xA9, 0x90, 0x8D, 0x14, 0xD4])  # Sustain/Release: S=9, R=0 (quick decay)
 
 # === INIT SPRITE ===
 # Set sprite pointer (sprite 0 data at $0340 = block 13)
@@ -300,20 +307,20 @@ code.extend([0xA5, 0x03, 0x8D, 0x01, 0xD0])  # Sprite 0 Y
 code.extend([0xA5, 0x06, 0x8D, 0x27, 0xD0])  # Sprite 0 color
 
 # === MUSIC ===
-code.extend([0xE6, 0xFF, 0xA5, 0xFF, 0x29, 0x0B])  # Slower tempo (every 12 frames)
+code.extend([0xE6, 0xFF, 0xA5, 0xFF, 0x29, 0x03])  # Fast tempo (every 4 frames) for arpeggios
 music_bne_idx = len(code) + 1
 code.extend([0xD0, 0x00])
 
 music_start = len(code)
 code.extend([0xA6, 0xFE])
 
-# V1 - Triangle wave (0x10/0x11) for flute-like Japanese sound
-code.extend([0xA9, 0x10, 0x8D, 0x04, 0xD4])  # Gate off, triangle
+# V1 - Pulse wave (0x40/0x41) for classic cracktro arpeggio sound
+code.extend([0xA9, 0x40, 0x8D, 0x04, 0xD4])  # Gate off, pulse
 mel_lo_idx = len(code) + 1
 code.extend([0xBD, 0x00, 0x00, 0x8D, 0x00, 0xD4])
 mel_hi_idx = len(code) + 1
 code.extend([0xBD, 0x00, 0x00, 0x8D, 0x01, 0xD4])
-code.extend([0xA9, 0x11, 0x8D, 0x04, 0xD4])  # Gate on, triangle
+code.extend([0xA9, 0x41, 0x8D, 0x04, 0xD4])  # Gate on, pulse
 
 # V2
 code.extend([0xA9, 0x20, 0x8D, 0x0B, 0xD4])
