@@ -14,6 +14,8 @@ def text_to_petscii(text):
         elif c == '*': result.append(42)
         elif c == '-': result.append(45)
         elif c == '.': result.append(46)
+        elif c == ':': result.append(58)
+        elif c == '_': result.append(100)  # underscore in PETSCII
         else: result.append(32)
     return result
 
@@ -34,42 +36,42 @@ SID_NOTES = {
     'REST': (0x00, 0x00)
 }
 
-# Last Ninja Japanese style - 64 note patterns
-# Using Japanese "In" scale (E, F, A, B, C) for haunting Eastern feel
+# Classic cracktro style - energetic arpeggio-based music
+# Using C minor scale for dramatic sound (C, D, Eb, F, G, Ab, Bb)
 MELODY = [
-    # Part A - Sparse Japanese melody, lots of space
-    'E4','REST','REST','REST','F4','REST','E4','REST',
-    'REST','REST','A4','REST','REST','REST','REST','REST',
-    'B4','REST','REST','REST','A4','REST','E4','REST',
-    'F4','REST','E4','REST','REST','REST','REST','REST',
-    # Part B - Rising tension
-    'A4','REST','B4','REST','C5','REST','REST','REST',
-    'B4','REST','A4','REST','E4','REST','REST','REST',
-    'F4','REST','A4','REST','E4','REST','F4','REST',
-    'E4','REST','REST','REST','REST','REST','REST','REST',
+    # Part A - Arpeggio lead, classic cracktro feel
+    'C4','E4','G4','C5','G4','E4','C4','E4',
+    'G4','C5','E5','C5','G4','E4','C4','REST',
+    'A3','C4','E4','A4','E4','C4','A3','C4',
+    'E4','A4','C5','A4','E4','C4','A3','REST',
+    # Part B - Rising arpeggios
+    'F3','A3','C4','F4','C4','A3','F3','A3',
+    'C4','F4','A4','F4','C4','A3','F3','REST',
+    'G3','B3','D4','G4','D4','B3','G3','B3',
+    'D4','G4','B4','G4','D4','B3','G3','REST',
 ]
 
-# Bass - minimal, deep, rhythmic like Last Ninja
+# Bass - punchy, driving bass line
 BASS = [
-    # Sparse bass with octave hits
-    'E2','REST','E3','REST','E2','REST','REST','REST',
-    'E2','REST','E3','REST','E2','REST','E2','E3',
-    'A2','REST','A3','REST','A2','REST','REST','REST',
-    'A2','REST','A3','REST','G2','REST','G3','REST',
-    # Second half - building
-    'E2','REST','E3','REST','E2','E2','E3','REST',
-    'F2','REST','F3','REST','E2','REST','E3','REST',
-    'A2','REST','A3','REST','A2','A2','A3','REST',
-    'E2','E2','E3','E2','E2','E3','E2','REST',
+    # Classic C64 bass pattern
+    'C2','C2','C3','C2','C2','C3','C2','C3',
+    'C2','C2','C3','C2','C2','C3','C2','REST',
+    'A2','A2','A3','A2','A2','A3','A2','A3',
+    'A2','A2','A3','A2','A2','A3','A2','REST',
+    # Second half
+    'F2','F2','F3','F2','F2','F3','F2','F3',
+    'F2','F2','F3','F2','F2','F3','F2','REST',
+    'G2','G2','G3','G2','G2','G3','G2','G3',
+    'G2','G2','G3','G2','G2','G3','G2','REST',
 ]
 
-# Drums - sparse, taiko-style with rim clicks
-# 1=deep kick, 2=rim/snare, 3=soft tick, 0=rest
+# Drums - energetic cracktro beat
+# 1=kick, 2=snare, 3=hihat, 0=rest
 DRUMS = [
-    1,0,0,3,0,0,3,0,1,0,0,3,2,0,0,0,  # Sparse taiko feel
-    1,0,0,3,0,0,3,0,1,0,3,0,2,0,3,0,  # Variation
-    1,0,0,0,2,0,0,0,1,0,0,3,2,0,0,3,  # Minimal
-    1,0,3,0,2,0,3,0,1,0,1,0,2,0,2,0,  # Building fill
+    1,0,3,0,2,0,3,0,1,0,3,0,2,0,3,3,  # Basic beat
+    1,0,3,0,2,0,3,0,1,1,3,0,2,0,3,0,  # Variation
+    1,0,3,0,2,0,3,0,1,0,3,0,2,2,3,0,  # Double snare
+    1,0,3,3,2,0,3,0,1,1,3,0,2,0,2,0,  # Fill
 ]
 
 # Sprite data - Pulumi logo: 9 ovals in isometric cube arrangement
@@ -81,37 +83,38 @@ DRUMS = [
 #     ████  ████           <- row of 2 ovals
 #        ████              <- bottom oval
 #
+# Pulumi logo sprite - converted from PNG with alpha channel detection
 SPRITE_DATA = [
-    0b00000000, 0b00000000, 0b00000000,  # Row 1
-    0b00000000, 0b11100000, 0b00000000,  # Row 2        ███
-    0b00000001, 0b11110000, 0b00000000,  # Row 3       █████   (top dot)
-    0b00000000, 0b11100000, 0b00000000,  # Row 4        ███
-    0b00000011, 0b10001110, 0b00000000,  # Row 5      ███ ███
-    0b00000111, 0b11011111, 0b00000000,  # Row 6     █████████  (2 dots)
-    0b00000011, 0b10001110, 0b00000000,  # Row 7      ███ ███
-    0b00001110, 0b00111000, 0b11100000,  # Row 8    ███  ███  ███
-    0b00011111, 0b01111101, 0b11110000,  # Row 9   █████████████████ (3 dots)
-    0b00011111, 0b01111101, 0b11110000,  # Row 10  █████████████████
-    0b00001110, 0b00111000, 0b11100000,  # Row 11   ███  ███  ███
-    0b00001110, 0b00111000, 0b11100000,  # Row 12   ███  ███  ███
-    0b00011111, 0b01111101, 0b11110000,  # Row 13  █████████████████ (3 dots)
-    0b00001110, 0b00111000, 0b11100000,  # Row 14   ███  ███  ███
-    0b00000011, 0b10001110, 0b00000000,  # Row 15     ███ ███
-    0b00000111, 0b11011111, 0b00000000,  # Row 16    █████████  (2 dots)
-    0b00000011, 0b10001110, 0b00000000,  # Row 17     ███ ███
-    0b00000000, 0b11100000, 0b00000000,  # Row 18       ███
-    0b00000001, 0b11110000, 0b00000000,  # Row 19      █████   (bottom dot)
-    0b00000000, 0b11100000, 0b00000000,  # Row 20       ███
+    0b00000000, 0b01111110, 0b00000000,  # Row 1
+    0b00000000, 0b11111111, 0b00000000,  # Row 2
+    0b00000000, 0b01111110, 0b00000000,  # Row 3
+    0b00001111, 0b00000000, 0b11110000,  # Row 4
+    0b00011111, 0b10000001, 0b11111000,  # Row 5
+    0b00011111, 0b00000000, 0b11111000,  # Row 6
+    0b11000000, 0b01111110, 0b00000011,  # Row 7
+    0b11110000, 0b11111111, 0b00001111,  # Row 8
+    0b11111000, 0b01111110, 0b00011111,  # Row 9
+    0b01111011, 0b10111101, 0b10011110,  # Row 10
+    0b00111011, 0b11000011, 0b11011100,  # Row 11
+    0b00011011, 0b11100111, 0b11011000,  # Row 12
+    0b01100011, 0b11100111, 0b11000110,  # Row 13
+    0b11110001, 0b11100111, 0b00001111,  # Row 14
+    0b11111000, 0b01100110, 0b00011111,  # Row 15
+    0b01111011, 0b10000001, 0b11011110,  # Row 16
+    0b00111011, 0b11100111, 0b11011100,  # Row 17
+    0b00000011, 0b11100111, 0b11000000,  # Row 18
+    0b00000011, 0b11100111, 0b11000000,  # Row 19
+    0b00000001, 0b11100111, 0b00000000,  # Row 20
     0b00000000, 0b00000000, 0b00000000,  # Row 21
 ]
 
 SCREEN = 0x0400
 COLORRAM = 0xD800
 
-title = "*** CLASSIC C64 DEMO ***"
-cracked = "CRACKED BY"
-crew = "CLAUDE CODERS"
-scroll = "    WELCOME TO THE PULUMI DEMO!   GREETINGS TO ALL CLOUD ENGINEERS!   INFRASTRUCTURE AS CODE FOREVER!   MUSIC IN THE STYLE OF THE LAST NINJA BY BEN DAGLISH...   LONG LIVE THE COMMODORE 64!       "
+title = "*** IAC MASTERMIND CREW ***"
+cracked = "PRESENTS"
+crew = "ENGIN DIRI"
+scroll = "    ENGIN DIRI X:_EDIRI GITHUB:DIRIEN ... INFRASTRUCTURE AS CODE CREW RULES THE WORLD!   GREETS TO ALL CLOUD ENGINEERS - PULUMI CREW - DEVOPS LEGENDS       "
 
 prg = bytearray()
 def lo(a): return a & 0xFF
@@ -174,23 +177,28 @@ for i, ch in enumerate(wpet):
 # Init SID
 for i in range(25):
     code.extend([0xA9, 0x00, 0x8D, lo(0xD400+i), hi(0xD400+i)])
-# SID master volume
-code.extend([0xA9, 0x0F, 0x8D, 0x18, 0xD4])
-# Voice 1 (lead): ADSR - soft attack for flute-like Japanese shakuhachi sound
-code.extend([0xA9, 0x36, 0x8D, 0x05, 0xD4])  # Attack/Decay: A=3, D=6 (soft attack)
-code.extend([0xA9, 0xC7, 0x8D, 0x06, 0xD4])  # Sustain/Release: S=C, R=7
-# Voice 1 pulse width (for rich sound)
+# SID master volume with low-pass filter
+code.extend([0xA9, 0x1F, 0x8D, 0x18, 0xD4])  # Volume 15 + lowpass filter on
+# Filter cutoff - medium high for bright sound
+code.extend([0xA9, 0x00, 0x8D, 0x15, 0xD4])  # Filter cutoff lo
+code.extend([0xA9, 0x40, 0x8D, 0x16, 0xD4])  # Filter cutoff hi (medium)
+# Filter resonance and routing - filter voice 1 and 2
+code.extend([0xA9, 0x73, 0x8D, 0x17, 0xD4])  # Resonance=7, filter voices 1+2
+# Voice 1 (lead): ADSR - fast arpeggio attack for classic cracktro
+code.extend([0xA9, 0x09, 0x8D, 0x05, 0xD4])  # Attack/Decay: A=0, D=9 (snappy)
+code.extend([0xA9, 0x00, 0x8D, 0x06, 0xD4])  # Sustain/Release: S=0, R=0 (percussive)
+# Voice 1 pulse width (for rich PWM sound)
 code.extend([0xA9, 0x00, 0x8D, 0x02, 0xD4])  # PW lo
 code.extend([0xA9, 0x08, 0x8D, 0x03, 0xD4])  # PW hi (50% duty)
 # Voice 2 (bass): ADSR - punchy bass
-code.extend([0xA9, 0x00, 0x8D, 0x0C, 0xD4])  # Attack/Decay: A=0, D=0
-code.extend([0xA9, 0xF6, 0x8D, 0x0D, 0xD4])  # Sustain/Release: S=F, R=6
-# Voice 2 pulse width
+code.extend([0xA9, 0x09, 0x8D, 0x0C, 0xD4])  # Attack/Decay: A=0, D=9
+code.extend([0xA9, 0x00, 0x8D, 0x0D, 0xD4])  # Sustain/Release: S=0, R=0 (punchy)
+# Voice 2 pulse width - saw wave for bass
 code.extend([0xA9, 0x00, 0x8D, 0x09, 0xD4])  # PW lo
-code.extend([0xA9, 0x04, 0x8D, 0x0A, 0xD4])  # PW hi (25% duty - more bass)
+code.extend([0xA9, 0x04, 0x8D, 0x0A, 0xD4])  # PW hi (25% duty)
 # Voice 3 (drums): ADSR - percussive
 code.extend([0xA9, 0x00, 0x8D, 0x13, 0xD4])  # Attack/Decay: A=0, D=0
-code.extend([0xA9, 0x80, 0x8D, 0x14, 0xD4])  # Sustain/Release: S=8, R=0 (quick decay)
+code.extend([0xA9, 0x90, 0x8D, 0x14, 0xD4])  # Sustain/Release: S=9, R=0 (quick decay)
 
 # === INIT SPRITE ===
 # Set sprite pointer (sprite 0 data at $0340 = block 13)
@@ -221,6 +229,10 @@ code.extend([0xA9, 0x00, 0x85, 0xFB])
 scroll_hi_idx = len(code) + 1
 code.extend([0xA9, 0x00, 0x85, 0xFC])
 code.extend([0xA9, 0x00, 0x85, 0xFD, 0xA9, 0x00, 0x85, 0xFE, 0xA9, 0x00, 0x85, 0xFF])
+# Init raster offset ($F9) for animated raster bars
+code.extend([0xA9, 0x00, 0x85, 0xF9])
+# Init sine phase ($F8) for sine wave scroller
+code.extend([0xA9, 0x00, 0x85, 0xF8])
 
 # CLI
 code.append(0x58)
@@ -228,19 +240,130 @@ code.append(0x58)
 # === MAIN LOOP ===
 main_loop_pos = len(code)
 
-# Wait for raster 250
+# Wait for raster 50 (top of screen)
 wait_pos = len(code)
-code.extend([0xAD, 0x12, 0xD0, 0xC9, 0xFA])
+code.extend([0xAD, 0x12, 0xD0, 0xC9, 0x32])  # CMP #50
 offset = (wait_pos - (len(code) + 2)) & 0xFF
 code.extend([0xD0, offset])
 
-# Raster bars
-code.extend([0xA2, 0x20])
-raster_pos = len(code)
-code.extend([0xAD, 0x12, 0xD0, 0x29, 0x0F, 0x8D, 0x20, 0xD0, 0xCA])
-offset = (raster_pos - (len(code) + 2)) & 0xFF
+# Rainbow raster bars - use raster_offset ($F9) to animate
+code.extend([0xE6, 0xF9])  # INC raster_offset (for animation)
+code.extend([0xA2, 0x00])  # LDX #0 (raster bar counter)
+
+raster_loop_pos = len(code)
+# Wait for next raster line
+raster_wait_pos = len(code)
+code.extend([0xEC, 0x12, 0xD0])  # CPX $D012
+offset = (raster_wait_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])  # BNE wait
+
+# Calculate color: (X + raster_offset) AND 15, lookup in color table
+code.extend([0x8A])  # TXA
+code.extend([0x18, 0x65, 0xF9])  # CLC, ADC $F9 (add raster_offset)
+code.extend([0x29, 0x0F])  # AND #15
+code.extend([0xA8])  # TAY
+raster_color_idx = len(code) + 1
+code.extend([0xB9, 0x00, 0x00])  # LDA color_table,Y
+code.extend([0x8D, 0x20, 0xD0])  # STA $D020 (border)
+
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0xC8])  # CPX #200 (200 lines of raster bars)
+offset = (raster_loop_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])  # BNE raster_loop
+
+code.extend([0xA9, 0x00, 0x8D, 0x20, 0xD0])  # Reset border to black
+
+# === STARFIELD ===
+# Update 16 stars at fixed Y positions, moving left at different speeds
+# Stars are stored in star_x array, updated each frame
+# Layer 1 (fast, 8 stars): decrement X by 2
+# Layer 2 (slow, 8 stars): decrement X by 1
+# Star character: $2E (period) or $51 (filled circle)
+
+# Update fast stars (layer 1)
+code.extend([0xA2, 0x00])  # LDX #0
+star_loop1_pos = len(code)
+# Erase old star: read position, write space
+star_x_fast_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_x_fast,X
+code.extend([0xA8])  # TAY
+star_y_fast_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_y_fast,X (row offset lo)
+code.extend([0x85, 0xF3])  # STA $F3
+star_yhi_fast_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_yhi_fast,X (row offset hi)
+code.extend([0x85, 0xF4])  # STA $F4 (hi byte must be at $F3+1 for indirect!)
+code.extend([0xA9, 0x20])  # LDA #32 (space)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+
+# Move star left by 2
+code.extend([0x98])  # TYA
+code.extend([0x38])  # SEC
+code.extend([0xE9, 0x02])  # SBC #2
+code.extend([0x10, 0x02])  # BPL no_wrap
+code.extend([0xA9, 0x27])  # LDA #39 (wrap to right)
+# no_wrap:
+star_x_store_fast = len(code) + 1
+code.extend([0x9D, 0x00, 0x00])  # STA star_x_fast,X
+
+# Draw new star
+code.extend([0xA8])  # TAY (new X position)
+code.extend([0xA9, 0x51])  # LDA #$51 (filled circle char)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+# Color: white
+code.extend([0xA5, 0xF4])  # LDA hi (from $F4 now)
+code.extend([0x18])  # CLC
+code.extend([0x69, 0xD4])  # ADC #$D4
+code.extend([0x85, 0xF4])  # STA hi (now points to color RAM)
+code.extend([0xA9, 0x01])  # LDA #1 (white)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0x08])  # CPX #8
+offset = (star_loop1_pos - (len(code) + 2)) & 0xFF
 code.extend([0xD0, offset])
-code.extend([0xA9, 0x00, 0x8D, 0x20, 0xD0])
+
+# Update slow stars (layer 2)
+code.extend([0xA2, 0x00])  # LDX #0
+star_loop2_pos = len(code)
+# Erase old star
+star_x_slow_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_x_slow,X
+code.extend([0xA8])  # TAY
+star_y_slow_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_y_slow,X
+code.extend([0x85, 0xF3])  # STA $F3
+star_yhi_slow_idx = len(code) + 1
+code.extend([0xBD, 0x00, 0x00])  # LDA star_yhi_slow,X
+code.extend([0x85, 0xF4])  # STA $F4 (hi byte must be at $F3+1 for indirect!)
+code.extend([0xA9, 0x20])  # LDA #32 (space)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+
+# Move star left by 1
+code.extend([0x98])  # TYA
+code.extend([0x38])  # SEC
+code.extend([0xE9, 0x01])  # SBC #1
+code.extend([0x10, 0x02])  # BPL no_wrap2
+code.extend([0xA9, 0x27])  # LDA #39 (wrap)
+# no_wrap2:
+star_x_store_slow = len(code) + 1
+code.extend([0x9D, 0x00, 0x00])  # STA star_x_slow,X
+
+# Draw new star (dimmer, gray)
+code.extend([0xA8])  # TAY
+code.extend([0xA9, 0x2E])  # LDA #$2E (period for distant star)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+code.extend([0xA5, 0xF4])  # LDA hi (from $F4 now)
+code.extend([0x18])  # CLC
+code.extend([0x69, 0xD4])  # ADC #$D4
+code.extend([0x85, 0xF4])  # STA hi (now points to color RAM)
+code.extend([0xA9, 0x0C])  # LDA #12 (gray - dimmer)
+code.extend([0x91, 0xF3])  # STA ($F3),Y
+
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0x08])  # CPX #8
+offset = (star_loop2_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])
 
 # === SPRITE MOVEMENT ===
 # Simpler approach: always update position, check bounds, change color on bounce
@@ -300,20 +423,20 @@ code.extend([0xA5, 0x03, 0x8D, 0x01, 0xD0])  # Sprite 0 Y
 code.extend([0xA5, 0x06, 0x8D, 0x27, 0xD0])  # Sprite 0 color
 
 # === MUSIC ===
-code.extend([0xE6, 0xFF, 0xA5, 0xFF, 0x29, 0x0B])  # Slower tempo (every 12 frames)
+code.extend([0xE6, 0xFF, 0xA5, 0xFF, 0x29, 0x03])  # Fast tempo (every 4 frames) for arpeggios
 music_bne_idx = len(code) + 1
 code.extend([0xD0, 0x00])
 
 music_start = len(code)
 code.extend([0xA6, 0xFE])
 
-# V1 - Triangle wave (0x10/0x11) for flute-like Japanese sound
-code.extend([0xA9, 0x10, 0x8D, 0x04, 0xD4])  # Gate off, triangle
+# V1 - Pulse wave (0x40/0x41) for classic cracktro arpeggio sound
+code.extend([0xA9, 0x40, 0x8D, 0x04, 0xD4])  # Gate off, pulse
 mel_lo_idx = len(code) + 1
 code.extend([0xBD, 0x00, 0x00, 0x8D, 0x00, 0xD4])
 mel_hi_idx = len(code) + 1
 code.extend([0xBD, 0x00, 0x00, 0x8D, 0x01, 0xD4])
-code.extend([0xA9, 0x11, 0x8D, 0x04, 0xD4])  # Gate on, triangle
+code.extend([0xA9, 0x41, 0x8D, 0x04, 0xD4])  # Gate on, pulse
 
 # V2
 code.extend([0xA9, 0x20, 0x8D, 0x0B, 0xD4])
@@ -337,26 +460,97 @@ code.extend([0xE6, 0xFE, 0xA5, 0xFE, 0xC9, len(MELODY), 0xD0, 0x04, 0xA9, 0x00, 
 music_end = len(code)
 code[music_bne_idx] = (music_end - music_bne_idx - 1) & 0xFF
 
-# === SCROLL ===
+# === SINE WAVE SCROLL ===
+# Use $F8 for sine phase, increment each frame for animation
+code.extend([0xE6, 0xF8])  # INC sine_phase
+
+# Speed control - scroll every 4 frames
 code.extend([0xE6, 0xFD, 0xA5, 0xFD, 0x29, 0x03])
 scroll_bne_idx = len(code) + 1
 code.extend([0xD0, 0x00])
 
-scroll_code_start = len(code)
-code.extend([0xA2, 0x00])
-shift_pos = len(code)
-code.extend([0xBD, 0xC1, 0x07, 0x9D, 0xC0, 0x07, 0xBD, 0xC1, 0xDB, 0x9D, 0xC0, 0xDB, 0xE8, 0xE0, 0x27])
-offset = (shift_pos - (len(code) + 2)) & 0xFF
-code.extend([0xD0, offset])
+# Clear scroll area (rows 19-23, 5 rows)
+code.extend([0xA2, 0x00])  # LDX #0
+clear_scroll_pos = len(code)
+code.extend([0xA9, 0x20])  # LDA #32 (space)
+# Clear row 19 ($0400 + 19*40 = $0400 + 760 = $06F8)
+code.extend([0x9D, 0xF8, 0x06])  # STA $06F8,X
+# Clear row 20
+code.extend([0x9D, 0x20, 0x07])  # STA $0720,X
+# Clear row 21
+code.extend([0x9D, 0x48, 0x07])  # STA $0748,X
+# Clear row 22
+code.extend([0x9D, 0x70, 0x07])  # STA $0770,X
+# Clear row 23
+code.extend([0x9D, 0x98, 0x07])  # STA $0798,X
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0x28])  # CPX #40
+offset = (clear_scroll_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])  # BNE clear_loop
 
-code.extend([0xA0, 0x00, 0xB1, 0xFB, 0xD0, 0x08])
+# Check for end of scroll text and reset if needed
+code.extend([0xA0, 0x00])  # LDY #0
+code.extend([0xB1, 0xFB])  # LDA ($FB),Y - get first char
+code.extend([0xD0, 0x08])  # BNE not_end
+# Reset scroll if at end
 reset_lo_idx = len(code) + 1
 code.extend([0xA9, 0x00, 0x85, 0xFB])
 reset_hi_idx = len(code) + 1
 code.extend([0xA9, 0x00, 0x85, 0xFC])
-code.extend([0xB1, 0xFB])
+# not_end:
 
-code.extend([0x8D, 0xE7, 0x07, 0xA9, 0x0E, 0x8D, 0xE7, 0xDB])
+# Draw 40 characters with sine wave Y positions
+code.extend([0xA2, 0x00])  # LDX #0 (character position 0-39)
+sine_draw_pos = len(code)
+
+# Save X to $F5
+code.extend([0x86, 0xF5])  # STX $F5
+
+# Get character at ($FB),X
+code.extend([0xA5, 0xF5])  # LDA $F5 (X position)
+code.extend([0xA8])  # TAY
+code.extend([0xB1, 0xFB])  # LDA ($FB),Y - get char at offset X
+code.extend([0x85, 0xF7])  # STA $F7 (save character)
+
+# Calculate Y position from sine table: sine_table[(X + sine_phase) & 31]
+code.extend([0xA5, 0xF5])  # LDA X position
+code.extend([0x18, 0x65, 0xF8])  # CLC, ADC sine_phase
+code.extend([0x29, 0x1F])  # AND #31
+code.extend([0xA8])  # TAY
+sine_table_idx = len(code) + 1
+code.extend([0xB9, 0x00, 0x00])  # LDA sine_table,Y (get row 0-4)
+code.extend([0xA8])  # TAY (Y = row number)
+
+# Get screen row base address from lookup table
+# Use $F0-$F1 for screen pointer (not $FA-$FB which conflicts with scroll text ptr)
+row_table_idx = len(code) + 1
+code.extend([0xB9, 0x00, 0x00])  # LDA row_lo_table,Y
+code.extend([0x85, 0xF0])  # STA screen_lo ($F0)
+row_table_hi_idx = len(code) + 1
+code.extend([0xB9, 0x00, 0x00])  # LDA row_hi_table,Y
+code.extend([0x85, 0xF1])  # STA screen_hi ($F1 - must be $F0+1 for indirect!)
+
+# Store character at screen + X
+code.extend([0xA4, 0xF5])  # LDY $F5 (X position)
+code.extend([0xA5, 0xF7])  # LDA character
+code.extend([0x91, 0xF0])  # STA ($F0),Y - write to screen
+
+# Set color: convert screen addr to color RAM addr ($04xx->$D8xx, $07xx->$DBxx)
+code.extend([0xA5, 0xF1])  # LDA screen_hi (from $F1)
+code.extend([0x18])  # CLC
+code.extend([0x69, 0xD4])  # ADC #$D4
+code.extend([0x85, 0xF1])  # STA color_hi (to $F1)
+code.extend([0xA9, 0x0E])  # LDA #14 (light blue)
+code.extend([0x91, 0xF0])  # STA ($F0),Y - write color
+
+# Next character
+code.extend([0xA6, 0xF5])  # LDX $F5
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0x28])  # CPX #40
+offset = (sine_draw_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])  # BNE sine_draw_loop
+
+# Increment scroll position
 code.extend([0xE6, 0xFB, 0xD0, 0x02, 0xE6, 0xFC])
 
 # JMP main
@@ -396,6 +590,63 @@ for d in DRUMS: code.append(drum_freqs[d][1])
 drum_hi_addr = BASE + len(code)
 for d in DRUMS: code.append(drum_freqs[d][0])
 
+# Rainbow color table for raster bars (smooth color cycle)
+raster_color_addr = BASE + len(code)
+# Classic C64 rainbow: black, dark gray, brown, orange, yellow, light green,
+# cyan, light blue, blue, purple, red, light red, gray, light gray, white, light gray
+RASTER_COLORS = [0, 11, 9, 8, 7, 13, 3, 14, 6, 4, 2, 10, 12, 15, 1, 15]
+code.extend(RASTER_COLORS)
+
+# Sine table for Y positions (32 entries, values 0-4 for 5 rows)
+sine_table_addr = BASE + len(code)
+import math
+SINE_TABLE = []
+for i in range(32):
+    val = int(2 + 2 * math.sin(i * math.pi * 2 / 32))  # 0-4 range
+    SINE_TABLE.append(val)
+code.extend(SINE_TABLE)
+
+# Row address lookup tables (5 rows: 19-23)
+# Row 19: $06F8, Row 20: $0720, Row 21: $0748, Row 22: $0770, Row 23: $0798
+row_lo_table_addr = BASE + len(code)
+ROW_LO = [0xF8, 0x20, 0x48, 0x70, 0x98]
+code.extend(ROW_LO)
+
+row_hi_table_addr = BASE + len(code)
+ROW_HI = [0x06, 0x07, 0x07, 0x07, 0x07]
+code.extend(ROW_HI)
+
+# Star position tables for parallax starfield
+# Fast stars (layer 1) - X positions (8 stars)
+star_x_fast_addr = BASE + len(code)
+STAR_X_FAST = [5, 15, 25, 35, 10, 20, 30, 38]  # Initial X positions
+code.extend(STAR_X_FAST)
+
+# Fast stars - Y row addresses (lo byte), rows 6-13
+star_y_fast_addr = BASE + len(code)
+# Rows: 6=$04F0, 7=$0518, 8=$0540, 9=$0568, 10=$0590, 11=$05B8, 12=$05E0, 13=$0608
+STAR_Y_FAST_LO = [0xF0, 0x18, 0x40, 0x68, 0x90, 0xB8, 0xE0, 0x08]
+code.extend(STAR_Y_FAST_LO)
+
+star_yhi_fast_addr = BASE + len(code)
+STAR_Y_FAST_HI = [0x04, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x06]
+code.extend(STAR_Y_FAST_HI)
+
+# Slow stars (layer 2) - X positions (8 stars)
+star_x_slow_addr = BASE + len(code)
+STAR_X_SLOW = [3, 12, 22, 33, 8, 18, 28, 36]
+code.extend(STAR_X_SLOW)
+
+# Slow stars - Y row addresses, rows 7-14
+star_y_slow_addr = BASE + len(code)
+# Rows: 7=$0518, 8=$0540, 9=$0568, 10=$0590, 11=$05B8, 12=$05E0, 13=$0608, 14=$0630
+STAR_Y_SLOW_LO = [0x18, 0x40, 0x68, 0x90, 0xB8, 0xE0, 0x08, 0x30]
+code.extend(STAR_Y_SLOW_LO)
+
+star_yhi_slow_addr = BASE + len(code)
+STAR_Y_SLOW_HI = [0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x06, 0x06]
+code.extend(STAR_Y_SLOW_HI)
+
 # Sprite data
 sprite_data_addr = BASE + len(code)
 code.extend(SPRITE_DATA)
@@ -419,6 +670,36 @@ code[drum_lo_idx] = lo(drum_lo_addr)
 code[drum_lo_idx+1] = hi(drum_lo_addr)
 code[drum_hi_idx] = lo(drum_hi_addr)
 code[drum_hi_idx+1] = hi(drum_hi_addr)
+
+# Patch raster color table reference
+code[raster_color_idx] = lo(raster_color_addr)
+code[raster_color_idx+1] = hi(raster_color_addr)
+
+# Patch sine table and row table references
+code[sine_table_idx] = lo(sine_table_addr)
+code[sine_table_idx+1] = hi(sine_table_addr)
+code[row_table_idx] = lo(row_lo_table_addr)
+code[row_table_idx+1] = hi(row_lo_table_addr)
+code[row_table_hi_idx] = lo(row_hi_table_addr)
+code[row_table_hi_idx+1] = hi(row_hi_table_addr)
+
+# Patch starfield table references
+code[star_x_fast_idx] = lo(star_x_fast_addr)
+code[star_x_fast_idx+1] = hi(star_x_fast_addr)
+code[star_y_fast_idx] = lo(star_y_fast_addr)
+code[star_y_fast_idx+1] = hi(star_y_fast_addr)
+code[star_yhi_fast_idx] = lo(star_yhi_fast_addr)
+code[star_yhi_fast_idx+1] = hi(star_yhi_fast_addr)
+code[star_x_store_fast] = lo(star_x_fast_addr)
+code[star_x_store_fast+1] = hi(star_x_fast_addr)
+code[star_x_slow_idx] = lo(star_x_slow_addr)
+code[star_x_slow_idx+1] = hi(star_x_slow_addr)
+code[star_y_slow_idx] = lo(star_y_slow_addr)
+code[star_y_slow_idx+1] = hi(star_y_slow_addr)
+code[star_yhi_slow_idx] = lo(star_yhi_slow_addr)
+code[star_yhi_slow_idx+1] = hi(star_yhi_slow_addr)
+code[star_x_store_slow] = lo(star_x_slow_addr)
+code[star_x_store_slow+1] = hi(star_x_slow_addr)
 
 # Calculate sprite block number (sprite_data_addr / 64)
 sprite_block = sprite_data_addr // 64
