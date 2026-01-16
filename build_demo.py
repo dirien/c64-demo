@@ -228,6 +228,8 @@ code.extend([0xA9, 0x00, 0x85, 0xFB])
 scroll_hi_idx = len(code) + 1
 code.extend([0xA9, 0x00, 0x85, 0xFC])
 code.extend([0xA9, 0x00, 0x85, 0xFD, 0xA9, 0x00, 0x85, 0xFE, 0xA9, 0x00, 0x85, 0xFF])
+# Init raster offset ($F9) for animated raster bars
+code.extend([0xA9, 0x00, 0x85, 0xF9])
 
 # CLI
 code.append(0x58)
@@ -235,19 +237,38 @@ code.append(0x58)
 # === MAIN LOOP ===
 main_loop_pos = len(code)
 
-# Wait for raster 250
+# Wait for raster 50 (top of screen)
 wait_pos = len(code)
-code.extend([0xAD, 0x12, 0xD0, 0xC9, 0xFA])
+code.extend([0xAD, 0x12, 0xD0, 0xC9, 0x32])  # CMP #50
 offset = (wait_pos - (len(code) + 2)) & 0xFF
 code.extend([0xD0, offset])
 
-# Raster bars
-code.extend([0xA2, 0x20])
-raster_pos = len(code)
-code.extend([0xAD, 0x12, 0xD0, 0x29, 0x0F, 0x8D, 0x20, 0xD0, 0xCA])
-offset = (raster_pos - (len(code) + 2)) & 0xFF
-code.extend([0xD0, offset])
-code.extend([0xA9, 0x00, 0x8D, 0x20, 0xD0])
+# Rainbow raster bars - use raster_offset ($F9) to animate
+code.extend([0xE6, 0xF9])  # INC raster_offset (for animation)
+code.extend([0xA2, 0x00])  # LDX #0 (raster bar counter)
+
+raster_loop_pos = len(code)
+# Wait for next raster line
+raster_wait_pos = len(code)
+code.extend([0xEC, 0x12, 0xD0])  # CPX $D012
+offset = (raster_wait_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])  # BNE wait
+
+# Calculate color: (X + raster_offset) AND 15, lookup in color table
+code.extend([0x8A])  # TXA
+code.extend([0x18, 0x65, 0xF9])  # CLC, ADC $F9 (add raster_offset)
+code.extend([0x29, 0x0F])  # AND #15
+code.extend([0xA8])  # TAY
+raster_color_idx = len(code) + 1
+code.extend([0xB9, 0x00, 0x00])  # LDA color_table,Y
+code.extend([0x8D, 0x20, 0xD0])  # STA $D020 (border)
+
+code.extend([0xE8])  # INX
+code.extend([0xE0, 0xC8])  # CPX #200 (200 lines of raster bars)
+offset = (raster_loop_pos - (len(code) + 2)) & 0xFF
+code.extend([0xD0, offset])  # BNE raster_loop
+
+code.extend([0xA9, 0x00, 0x8D, 0x20, 0xD0])  # Reset border to black
 
 # === SPRITE MOVEMENT ===
 # Simpler approach: always update position, check bounds, change color on bounce
@@ -403,6 +424,13 @@ for d in DRUMS: code.append(drum_freqs[d][1])
 drum_hi_addr = BASE + len(code)
 for d in DRUMS: code.append(drum_freqs[d][0])
 
+# Rainbow color table for raster bars (smooth color cycle)
+raster_color_addr = BASE + len(code)
+# Classic C64 rainbow: black, dark gray, brown, orange, yellow, light green,
+# cyan, light blue, blue, purple, red, light red, gray, light gray, white, light gray
+RASTER_COLORS = [0, 11, 9, 8, 7, 13, 3, 14, 6, 4, 2, 10, 12, 15, 1, 15]
+code.extend(RASTER_COLORS)
+
 # Sprite data
 sprite_data_addr = BASE + len(code)
 code.extend(SPRITE_DATA)
@@ -426,6 +454,10 @@ code[drum_lo_idx] = lo(drum_lo_addr)
 code[drum_lo_idx+1] = hi(drum_lo_addr)
 code[drum_hi_idx] = lo(drum_hi_addr)
 code[drum_hi_idx+1] = hi(drum_hi_addr)
+
+# Patch raster color table reference
+code[raster_color_idx] = lo(raster_color_addr)
+code[raster_color_idx+1] = hi(raster_color_addr)
 
 # Calculate sprite block number (sprite_data_addr / 64)
 sprite_block = sprite_data_addr // 64
